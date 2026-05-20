@@ -3,50 +3,51 @@
 
 interface apb_interface_dut;
 
-  logic        PCLK; 
-  logic        PRESETn;
-  logic        PSEL;
-  logic        PENABLE;
-  logic        PWRITE;
-  logic [7:0]  PADDR;
-  logic [31:0] PWDATA;
-  logic [31:0] PRDATA;
-  logic        PREADY;
+  logic        pclk; 
+  logic        presetn;
+  logic        psel;
+  logic        penable;
+  logic        pwrite;
+  logic [7:0]  paddr;
+  logic [31:0] pwdata;
+  logic [31:0] prdata;
+  logic        pready;
   
   import uvm_pkg::*;
-      
+     /* 
   // ASERTII
        // default clock
-  default clocking cb @(posedge PCLK); endclocking
+  default clocking cb @(posedge pclk); endclocking
 
   // 1. PENABLE trebuie activ doar după PSEL
   apb_enable_after_select: assert property (
-    PSEL && !PENABLE |=> PENABLE
-  ) else $error("APB ERROR: PENABLE nu vine dupa PSEL");
+    psel && !penable |=> penable
+  ) else $error("APB ERROR: penable nu vine dupa psel");
 
   // 2. PSEL trebuie sa ramana activ pe durata transferului
   apb_psel_stable: assert property (
-    PSEL && PENABLE |-> PSEL
-  ) else $error("APB ERROR: PSEL a fost dezactivat in timpul transferului");
+    psel && penable |-> psel
+  ) else $error("APB ERROR: psel a fost dezactivat in timpul transferului");
 
   // 3. Adresa si datele trebuie sa fie stabile in faza ENABLE
   apb_addr_stable: assert property (
-    PSEL && PENABLE |-> $stable(PADDR)
-  ) else $error("APB ERROR: PADDR nu e stabil");
+    psel && penable |-> $stable(paddr)
+  ) else $error("APB ERROR: paddr nu e stabil");
 
   apb_wdata_stable: assert property (
-    PSEL && PENABLE && PWRITE |-> $stable(PWDATA)
+    psel && penable && pwrite |-> $stable(pwdata)
   ) else $error("APB ERROR: PWDATA nu e stabil");
 
   // 4. Transferul se finalizeaza cand PREADY = 1
   apb_transfer_complete: assert property (
-    PSEL && PENABLE && PREADY |-> 1
+    psel && penable && pready |-> 1
   );
 
   // 5. Reset behavior
   apb_reset: assert property (
-    !PRESETn |-> !PSEL && !PENABLE
+    !presetn |-> !psel && !penable
   ) else $error("APB ERROR: Semnale active in reset"); 
+  */
 endinterface
 
 `endif

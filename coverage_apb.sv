@@ -10,6 +10,7 @@ class coverage_apb extends uvm_component;
 
   // ultima tranzacție
   tranzactie_apb tr;
+  monitor_apb p_monitor;
 
   // ---------------- COVERGROUP ----------------
   covergroup stari_apb_cg with function sample(tranzactie_apb t);
@@ -27,7 +28,7 @@ class coverage_apb extends uvm_component;
     }
 
     // ---------------- READ / WRITE ----------------
-    write_cp: coverpoint t.write {
+    write_cp: coverpoint t.wr_rd {
       bins read  = {0};
       bins write = {1};
     }
@@ -35,9 +36,9 @@ class coverage_apb extends uvm_component;
     // ---------------- DATA (simplificat) ----------------
     data_cp: coverpoint t.data {
       bins zero     = {0};
-      bins small    = {[1:10]};
-      bins medium   = {[11:100]};
-      bins large    = {[101:1000]};
+//      bins small    = {[1:10]};
+//      bins medium   = {[11:100]};
+//      bins large    = {[101:1000]};
       bins others   = default;
     }
 

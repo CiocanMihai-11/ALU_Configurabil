@@ -29,9 +29,9 @@ class test_exemplu extends uvm_test;
   //se instantiaza interfetele virtuale ale mediului de verificare; acestea vor fi ulterior corelate cu interfetele reale definite in fisierele interfata_intrari_dut si interfata_semafoare
 
   virtual apb_interface_dut vif_apb_dut;
-  virtual req_ack_interface_dut vif_req_ack_dut;
+  virtual req_ack_interface vif_req_ack_dut;
   
-   function void start_of_simulation_phase(uvm_phase phase);
+  function void start_of_simulation_phase(uvm_phase phase);
     super.start_of_simulation_phase(phase);
     this.print();
     uvm_top.print_topology();
@@ -46,11 +46,11 @@ class test_exemplu extends uvm_test;
     //Get virtual IF handle from top_level and pass it to everything in env level
     if (!uvm_config_db#(virtual apb_interface_dut)::get(this, "", "apb_interface_dut", vif_apb_dut))
       `uvm_fatal("TEST", "Nu s-a putut obtine din baza de date UVM tipul de interfata virtuala apb_interface_dut pentru a crea vif_apb_dut")
-    if (!uvm_config_db#(virtual req_ack_interface_dut)::get(this, "", "req_ack_interface_dut", vif_req_ack_dut))
+      if (!uvm_config_db#(virtual req_ack_interface)::get(this, "", "vif", vif_req_ack_dut))
       `uvm_fatal("TEST", "Nu s-a putut obtine din baza de date UVM tipul de interfata virtuala req_ack_interface_dut pentru a crea vif_req_ack_dut")
 
       //interfetele virtuale sunt folosite pentru a crea conexiunile cu agentii
-    uvm_config_db#(virtual req_ack_interface_dut)::set(this, "mediu_de_verificare.agent_req_ack_din_mediu.*", "req_ack_interface_dut",vif_req_ack_dut);
+    uvm_config_db#(virtual req_ack_interface)::set(this, "mediu_de_verificare.agent_req_ack_din_mediu.*", "req_ack_interface",vif_req_ack_dut);
     uvm_config_db#(virtual apb_interface_dut)::set(this, "mediu_de_verificare.agent_apb_din_mediu.*", "apb_interface_dut",vif_apb_dut);
 
     //Se creaza secventele de date de intrare (in cazul de fata avem doar o secventa, deoarece avem doar un agent activ), dandu-se apoi valori aleatoare campurilor declarate cu cuvantul cheie "rand" din interiorul clasei "secventa_intrari"
@@ -86,15 +86,13 @@ class test_exemplu extends uvm_test;
       `ifdef DEBUG
         $display("s-a terminat de rulat secventa pentru agentul activ agent_apb");
       `endif;
-      
-    
       end
 
       begin 
       `ifdef DEBUG
         $display("va incepe sa ruleze secventa: req_ack_seq pentru agentul activ agent_req_ack");
       `endif;
-        req_ack_seq.start(mediu_de_verificare.agent_req_ack_din_mediu.sequencer_agent_req_ack_inst0);
+        req_ack_seq.start(mediu_de_verificare.agent_req_ack_din_mediu.seqr);
       `ifdef DEBUG
         $display("s-a terminat de rulat secventa pentru agentul activ agent_req_ack");
       `endif;
@@ -107,26 +105,21 @@ class test_exemplu extends uvm_test;
     vif_apb_dut.psel     <= 0;
     vif_apb_dut.penable  <= 0;
     vif_apb_dut.paddr    <= 0;
-    vif_req_ack_dut.addr  <= 0;
-    vif_req_ack_dut.valid <= 0;
-    #100//se mai asteapta 100 de unitati de timp inainte sa se dezactiveze martorul de activitate, actiune care va permite simulatorului sa incheie activitatea
-	//se dezactiveaza martorul 
+    #100//se mai asteapta 100 de unitati de timp inainte sa se dezactivez
     phase.drop_objection(this);
     endtask
   
   //traficul de pe interfete este resetat
   virtual task apply_reset();
-    vif_apb_dut.rst_n    <= 1;
+    vif_apb_dut.presetn  <= 0;
     vif_apb_dut.paddr    <= 0;
     vif_apb_dut.penable  <= 0;
     vif_apb_dut.psel     <= 0;
-    vif_req_ack_dut.addr  <= 0;
-    vif_req_ack_dut.valid <= 0;
     `ifdef DEBUG
     $display("am asertat resetul");
     `endif;
     repeat(15) @(posedge vif_apb_dut.pclk);
-    vif_apb_dut.rst_n <= 0;
+    vif_apb_dut.presetn <= 1;
     `ifdef DEBUG
     $display("%t am deasertat resetul", $time());
     `endif;

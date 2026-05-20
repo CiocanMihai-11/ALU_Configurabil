@@ -1,5 +1,5 @@
-`include "req_ack_driver.sv"
-`include "req_ack_monitor.sv"
+`include "driver_agent_req_ack.sv"
+`include "monitor_req_ack.sv"
 class agent_req_ack extends uvm_agent;
 
   req_ack_driver    drv;
@@ -7,7 +7,9 @@ class agent_req_ack extends uvm_agent;
   uvm_sequencer #(req_ack_item) seqr; 
 
   `uvm_component_utils(agent_req_ack)
-
+  
+  uvm_analysis_port #(req_ack_item) de_la_monitor_req_ack;
+  
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
@@ -21,6 +23,7 @@ class agent_req_ack extends uvm_agent;
 
   function void connect_phase(uvm_phase phase);
     drv.seq_item_port.connect(seqr.seq_item_export);
+    de_la_monitor_req_ack = mon.port_date_monitor_req_ack;
   endfunction
 
 endclass

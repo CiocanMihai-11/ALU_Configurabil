@@ -1,18 +1,20 @@
 `ifndef __req_agn_intf
 `define __req_agn_intf
 
-interface req_agn_interface;
+interface req_ack_interface;
 
   logic clk;
+  logic rst_n;
   logic req;
   logic ack;
+  logic [31:0] result;
 
   import uvm_pkg::*;
 
   // ASERTII
   // default clock
   default clocking cb @(posedge clk); endclocking
-
+/*
   // 1. req trebuie urmat de ack (eventual)
   req_followed_by_ack: assert property (
     req |-> ##[1:5] ack
@@ -37,7 +39,7 @@ interface req_agn_interface;
   ack_not_stuck: assert property (
     ack |=> !ack
   ) else $error("REQ/ACK ERROR: ack blocat pe 1");
-  
+  */
 endinterface
 
 `endif

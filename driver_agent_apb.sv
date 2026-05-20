@@ -39,23 +39,40 @@ class driver_agent_apb extends uvm_driver #(tranzactie_apb);
     end
   endtask
   
-  task trimiterea_tranzactiei(tranzactie_apb informatia_de_transmis);
-    $timeformat(-9, 2, " ns", 20);//cand se va afisa in consola timpul, folosind directiva %t timpul va fi afisat in nanosecunde (-9), cu 2 zecimale, iar dupa valoare se va afisa abrevierea " ns"
-    
-    @(posedge interfata_driverului_pentru_apb.pclk);
-    interfata_driverului_pentru_apb.psel = 'b1;
-    @(posedge interfata_driverului_pentru_apb.pclk);
-  //  @(posedge interfata_driverului_pentru_apb.pclk);//transmiterea datelor se sincronizeaza cu ceasul de sistem
-    interfata_driverului_pentru_apb.penable = 'b1;
-    interfata_driverului_pentru_apb.paddr = informatia_de_transmis.addr;
-  
-	 @(posedge interfata_driverului_pentru_apb.pclk);
-    interfata_driverului_pentru_apb.psel = 'b0;
-    interfata_driverului_pentru_apb.penable = 'b0;
-    `ifdef DEBUG
-    $display("DRIVER_AGENT_apb, dupa transmisie; [T=%0t]", $realtime);
-    `endif;
-  endtask
+  task trimiterea_tranzactiei(tranzactie_apb t);
+
+  // =====================
+  // SETUP PHASE
+  // =====================
+  @(posedge interfata_driverului_pentru_apb.pclk);
+
+  interfata_driverului_pentru_apb.psel    <= 1;
+  interfata_driverului_pentru_apb.penable <= 0;
+  interfata_driverului_pentru_apb.paddr   <= t.addr;
+  interfata_driverului_pentru_apb.pwrite  <= t.wr_rd;
+
+  if(t.wr_rd)
+    interfata_driverului_pentru_apb.pwdata <= t.data;
+
+  // =====================
+  // ACCESS PHASE
+  // =====================
+  @(posedge interfata_driverului_pentru_apb.pclk);
+
+  interfata_driverului_pentru_apb.penable <= 1;
+
+  // IMPORTANT: wait for DUT
+  wait(interfata_driverului_pentru_apb.pready == 1);
+
+  @(posedge interfata_driverului_pentru_apb.pclk);
+
+  // =====================
+  // END TRANSFER
+  // =====================
+  interfata_driverului_pentru_apb.psel    <= 0;
+  interfata_driverului_pentru_apb.penable <= 0;
+
+endtask
   
 endclass
 `endif

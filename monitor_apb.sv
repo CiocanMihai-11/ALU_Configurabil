@@ -67,11 +67,14 @@ class monitor_apb extends uvm_monitor;
     forever begin
       
       //!!!!sa astept ca datele sa fie valide
-      wait(interfata_monitor_apb.psel && interfata_monitor_apb.penable); 
+      wait(interfata_monitor_apb.psel && interfata_monitor_apb.penable && interfata_monitor_apb.pready); 
       //vreau sa citesc semnalul valid_i doar pe fronturile descrescatoare de ceas
       @(negedge interfata_monitor_apb.pclk); 
       //preiau datele de pe interfata de iesire a DUT-ului (interfata_semafoare)
-      starea_preluata_a_apb.addr = interfata_monitor_apb.paddr;
+      starea_preluata_a_apb.addr  = interfata_monitor_apb.paddr;
+      starea_preluata_a_apb.wr_rd = interfata_monitor_apb.pwrite;
+      if(starea_preluata_a_apb.wr_rd) starea_preluata_a_apb.data = interfata_monitor_apb.pwdata;
+      else starea_preluata_a_apb.data = interfata_monitor_apb.prdata;
     
       aux_tr_apb = starea_preluata_a_apb.copy();//nu vreau sa folosesc pointerul starea_preluata_a_apb pentru a trimite datele, deoarece continutul acestuia se schimba, iar scoreboardul va citi alte date 
       
@@ -81,7 +84,7 @@ class monitor_apb extends uvm_monitor;
       aux_tr_apb.afiseaza_informatia_tranzactiei();
 	  
       //se inregistreaza valorile de pe cele doua semnale de iesire
-      colector_coverage_apb.stari_apb_cg.sample();
+      colector_coverage_apb.stari_apb_cg.sample(aux_tr_apb);
       
 	  @(negedge interfata_monitor_apb.pclk); //acest wait il adaug deoarece uneori o tranzactie este interpretata a fi doua tranzactii identice back to back (validul este citit ca fiind 1 pe doua fronturi consecutive de ceas); in implementarea curenta nu se poate sa vina doua tranzactii back to back
       
