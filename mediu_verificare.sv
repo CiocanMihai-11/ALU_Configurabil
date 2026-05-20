@@ -17,7 +17,7 @@ class mediu_verificare extends uvm_env;
   
   //se declara interfetele de pe care se vor prelua date
   virtual apb_interface_dut interfata_monitor_apb;
-  virtual req_ack_interface_dut interfata_monitor_req_ack;
+  virtual req_ack_interface interfata_monitor_req_ack;
 
   //se declara agentii
   
@@ -42,19 +42,18 @@ class mediu_verificare extends uvm_env;
     agent_apb_din_mediu = agent_apb::type_id::create("agent_apb_din_mediu", this);
     agent_req_ack_din_mediu = agent_req_ack::type_id::create("agent_req_ack_din_mediu", this);
     IO_scorboard = scoreboard::type_id::create("IO_scorboard", this);
-    
-    
+      // se preiau interfetele din baza de date; daca nu se pot prelua interfetele, se va da eroare
+    assert(uvm_resource_db#(virtual apb_interface_dut)::read_by_name(
+      get_full_name(), "apb_interface_dut", interfata_monitor_apb)) else `uvm_error("MEDIU DE VERIFICARE", "Nu s-a putut prelua din baza de date UVM apb_interface_dut");
+    assert(uvm_resource_db#(virtual req_ack_interface)::read_by_name(
+      get_full_name(), "vif", interfata_monitor_req_ack)) else `uvm_error("MEDIU DE VERIFICARE", "Nu s-a putut prelua din baza de date UVM req_ack_interface");
+   
   endfunction
   
 
   //se creaza conexiunile intre componente
   function void connect_phase(uvm_phase phase);
     `uvm_info("MEDIU DE VERIFICARE", "A inceput faza de realizare a conexiunilor", UVM_NONE);
-    // se preiau interfetele din baza de date; daca nu se pot prelua interfetele, se va da eroare
-    assert(uvm_resource_db#(virtual apb_interface_dut)::read_by_name(
-      get_full_name(), "apb_interface_dut", interfata_monitor_apb)) else `uvm_error("MEDIU DE VERIFICARE", "Nu s-a putut prelua din baza de date UVM apb_interface_dut");
-    assert(uvm_resource_db#(virtual req_ack_interface_dut)::read_by_name(
-      get_full_name(), "req_ack_interface_dut", interfata_monitor_req_ack)) else `uvm_error("MEDIU DE VERIFICARE", "Nu s-a putut prelua din baza de date UVM req_ack_interface_dut");
 	//conectarea scoreboardului la porturile de date ale agentilor
     
 agent_apb_din_mediu.de_la_monitor_apb.connect(IO_scorboard.port_pentru_datele_de_la_apb);
